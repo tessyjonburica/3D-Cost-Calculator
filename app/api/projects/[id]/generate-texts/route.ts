@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { z } from "zod";
+
+const aiSchema = z.object({
+    id: z.string(),
+});
 
 export async function POST(
     req: NextRequest,
@@ -13,10 +18,14 @@ export async function POST(
     }
 
     const { id: projectId } = await context.params;
+    const validation = aiSchema.safeParse({ id: projectId });
+    if (!validation.success) {
+        return NextResponse.json({ error: "Invalid project ID" }, { status: 400 });
+    }
 
     try {
         const project = await prisma.project.findUnique({
-            where: { id: projectId, userId: session.user.id as string },
+            where: { id: projectId, userId: session.user.id },
             include: {
                 modelFile: true,
                 parameters: true,

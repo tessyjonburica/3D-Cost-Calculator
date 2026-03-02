@@ -19,7 +19,7 @@ export const authOptions: NextAuthOptions = {
                 email: { label: "Email", type: "email" },
                 password: { label: "Password", type: "password" },
             },
-            async authorize(credentials) {
+            async authorize(credentials: Record<string, string> | undefined) {
                 if (!credentials?.email || !credentials?.password) {
                     return null;
                 }
@@ -51,15 +51,15 @@ export const authOptions: NextAuthOptions = {
         }),
     ],
     callbacks: {
-        async jwt({ token, user }) {
+        async jwt({ token, user }: { token: any; user?: any }) {
             if (user) {
                 token.id = user.id;
             }
             return token;
         },
-        async session({ session, token }) {
+        async session({ session, token }: { session: any; token: any }) {
             if (token && session.user) {
-                (session.user as any).id = token.id;
+                session.user.id = token.id;
             }
             return session;
         },

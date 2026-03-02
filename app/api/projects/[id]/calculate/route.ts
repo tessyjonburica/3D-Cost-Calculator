@@ -3,6 +3,11 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { calculateProjectCosts } from "@/lib/calculations";
+import { z } from "zod";
+
+const calculateSchema = z.object({
+    id: z.string(),
+});
 
 export async function POST(
     req: NextRequest,
@@ -14,18 +19,31 @@ export async function POST(
     }
 
     const { id } = await context.params;
+    const validation = calculateSchema.safeParse({ id });
+
+    if (!validation.success) {
+        return NextResponse.json({ error: "Invalid project ID" }, { status: 400 });
+    }
 
     try {
         const project = await prisma.project.findUnique({
-            where: { id, userId: session.user.id as string },
+            where: { id, userId: session.user.id },
             include: {
                 modelFile: true,
                 parameters: true,
             },
         });
 
-        if (!project || !project.modelFile || !project.parameters) {
+        if (!project) {
+            return NextResponse.json({ error: "Project not found" }, { status: 404 });
+        }
+
+        if (!project.modelFile || !project.parameters) {
             return NextResponse.json({ error: "Required data missing (Model or Parameters not set)" }, { status: 400 });
+        }
+
+        if (project.modelFile.status !== "READY") {
+            return NextResponse.json({ error: "Model processing not completed" }, { status: 400 });
         }
 
         const modelFile = project.modelFile;
@@ -48,11 +66,11 @@ export async function POST(
 
         const calculation = await prisma.projectCalculation.upsert({
             where: { projectId: id },
-            update: results as any,
+            update: results,
             create: {
                 projectId: id,
                 ...results,
-            } as any,
+            },
         });
 
         return NextResponse.json({ success: true, calculation });

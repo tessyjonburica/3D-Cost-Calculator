@@ -1,55 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Upload, File3D, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
-
-interface ModelFile {
-    status: "UPLOADING" | "QUEUED" | "PROCESSING" | "READY" | "ERROR";
-    errorMessage?: string;
-    dimX?: number;
-    dimY?: number;
-    dimZ?: number;
-    volume?: number;
-    polygonCount?: number;
-    originalFileName?: string;
-}
+import { Upload, Loader2 } from "lucide-react";
 
 interface ModelUploadProps {
     projectId: string;
-    initialModel?: ModelFile | null;
+    initialModel?: any;
 }
 
-export default function ModelUpload({ projectId, initialModel }: ModelUploadProps) {
-    const [model, setModel] = useState<ModelFile | null>(initialModel || null);
+export default function ModelUpload({ projectId }: ModelUploadProps) {
     const [uploading, setUploading] = useState(false);
     const router = useRouter();
-
-    // Poll for status updates if processing
-    useEffect(() => {
-        if (!model || (model.status !== "QUEUED" && model.status !== "PROCESSING")) return;
-
-        const interval = setInterval(async () => {
-            try {
-                const res = await fetch(`/api/projects/${projectId}`);
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.modelFile) {
-                        setModel(data.modelFile);
-                        if (data.modelFile.status === "READY" || data.modelFile.status === "ERROR") {
-                            clearInterval(interval);
-                            router.refresh();
-                        }
-                    }
-                }
-            } catch (err) {
-                console.error("Polling error:", err);
-            }
-        }, 3000);
-
-        return () => clearInterval(interval);
-    }, [model, projectId, router]);
 
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -60,99 +22,40 @@ export default function ModelUpload({ projectId, initialModel }: ModelUploadProp
         formData.append("file", file);
 
         try {
-            const res = await fetch(`/api/projects/${projectId}/upload-model`, {
+            await fetch(`/api/projects/${projectId}/upload-model`, {
                 method: "POST",
                 body: formData,
             });
-
-            if (res.ok) {
-                const data = await res.json();
-                setModel(data.modelFile);
-                router.refresh();
-            } else {
-                const data = await res.json();
-                alert(data.error || "Upload failed");
-            }
+            router.refresh();
         } catch (err) {
-            alert("Upload failed. Please check your connection.");
+            console.error("Upload failed:", err);
         } finally {
             setUploading(false);
         }
     };
 
-    if (uploading || (model?.status === "QUEUED" || model?.status === "PROCESSING")) {
-        return (
-            <div className="flex flex-col items-center justify-center p-12 bg-zinc-50 rounded-lg border border-dashed border-zinc-200">
-                <Loader2 className="h-8 w-8 text-zinc-400 animate-spin mb-4" />
-                <h3 className="text-sm font-medium text-zinc-900">
-                    {uploading ? "Uploading Model..." : "Processing Geometry..."}
-                </h3>
-                <p className="text-xs text-zinc-500 mt-1">This usually takes a few seconds</p>
-            </div>
-        );
-    }
-
-    if (model?.status === "READY") {
-        return (
-            <div className="p-6 bg-white rounded-lg border border-zinc-100 space-y-4">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 bg-green-50 rounded-full">
-                            <CheckCircle2 className="h-5 w-5 text-green-600" />
-                        </div>
-                        <div>
-                            <h3 className="text-sm font-medium text-zinc-900">{model.originalFileName}</h3>
-                            <p className="text-xs text-zinc-500 uppercase tracking-tighter">Model Ready</p>
-                        </div>
-                    </div>
-                    <label className="cursor-pointer">
-                        <input type="file" className="hidden" accept=".stl,.obj,.3mf" onChange={handleUpload} />
-                        <span className="text-xs text-zinc-400 hover:text-zinc-600 underline">Replace</span>
-                    </label>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 border-t border-zinc-50 pt-4">
-                    <div className="space-y-1">
-                        <p className="text-[10px] font-medium text-zinc-400 uppercase">Dimensions (mm)</p>
-                        <p className="text-sm font-semibold tabular-nums">
-                            {Number(model.dimX).toFixed(1)} × {Number(model.dimY).toFixed(1)} × {Number(model.dimZ).toFixed(1)}
-                        </p>
-                    </div>
-                    <div className="space-y-1">
-                        <p className="text-[10px] font-medium text-zinc-400 uppercase">Volume (cm³)</p>
-                        <p className="text-sm font-semibold tabular-nums">{(Number(model.volume) / 1000).toFixed(2)}</p>
-                    </div>
-                </div>
-
-                <div className="flex items-center justify-between text-[10px] text-zinc-400 border-t border-zinc-50 pt-2">
-                    <span>POLYGONS: {model.polygonCount?.toLocaleString()}</span>
-                </div>
-            </div>
-        );
-    }
-
-    if (model?.status === "ERROR") {
-        return (
-            <div className="p-6 bg-red-50 rounded-lg border border-red-100 flex items-start gap-4">
-                <AlertCircle className="h-5 w-5 text-red-600 mt-0.5" />
-                <div className="flex-1">
-                    <h3 className="text-sm font-medium text-red-900">Processing Failed</h3>
-                    <p className="text-xs text-red-700 mt-1">{model.errorMessage || "An error occurred during analysis."}</p>
-                    <label className="mt-3 inline-block cursor-pointer">
-                        <input type="file" className="hidden" accept=".stl,.obj,.3mf" onChange={handleUpload} />
-                        <span className="text-xs font-semibold bg-red-600 text-white px-3 py-1.5 rounded-md hover:bg-red-700">Retry Upload</span>
-                    </label>
-                </div>
-            </div>
-        );
-    }
-
     return (
-        <div className="flex flex-col items-center justify-center p-12 bg-white rounded-lg border border-dashed border-zinc-200 hover:border-zinc-400 transition-colors cursor-pointer relative">
-            <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept=".stl,.obj,.3mf" onChange={handleUpload} />
-            <Upload className="h-8 w-8 text-zinc-300 mb-4" />
-            <h3 className="text-sm font-medium text-zinc-900">Upload 3D Model</h3>
-            <p className="text-xs text-zinc-500 mt-1">STL, OBJ, or 3MF up to 50MB</p>
-        </div>
+        <label className="w-full h-[500px] flex flex-col items-center justify-center border-2 border-dashed border-zinc-100 rounded-3xl hover:bg-zinc-50/50 hover:border-zinc-200 transition-all cursor-pointer group relative">
+            <input type="file" className="hidden" accept=".stl,.obj,.3mf" onChange={handleUpload} disabled={uploading} />
+
+            <div className="text-center space-y-6">
+                <div className="mx-auto w-12 h-12 flex items-center justify-center rounded-2xl bg-zinc-50 group-hover:scale-110 transition-transform">
+                    {uploading ? <Loader2 className="h-5 w-5 animate-spin text-black" /> : <Upload className="h-5 w-5 text-black" />}
+                </div>
+
+                <div className="space-y-1">
+                    <p className="text-[11px] font-black uppercase tracking-[0.3em] text-black">
+                        {uploading ? "Ingesting Geometry" : "Import 3D Asset"}
+                    </p>
+                    <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest leading-loose">
+                        STL / OBJ / 3MF <br /> Maximum 50mb
+                    </p>
+                </div>
+            </div>
+
+            <div className="absolute bottom-8 text-[8px] font-bold text-zinc-300 uppercase tracking-widest">
+                Drag and drop or click to browse
+            </div>
+        </label>
     );
 }

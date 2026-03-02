@@ -6,6 +6,11 @@ import { modelProcessingQueue } from "@/lib/queue/modelProcessingQueue";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
+import { z } from "zod";
+
+const uploadSchema = z.object({
+    projectId: z.string(),
+});
 
 export async function POST(
     req: NextRequest,
@@ -17,10 +22,14 @@ export async function POST(
     }
 
     const { projectId } = await context.params;
+    const validation = uploadSchema.safeParse({ projectId });
+    if (!validation.success) {
+        return NextResponse.json({ error: "Invalid project ID" }, { status: 400 });
+    }
 
     // Verify project ownership
     const project = await prisma.project.findUnique({
-        where: { id: projectId, userId: session.user.id as string },
+        where: { id: projectId, userId: session.user.id },
     });
 
     if (!project) {
@@ -29,10 +38,10 @@ export async function POST(
 
     try {
         const formData = await req.formData();
-        const file = formData.get("file") as File;
+        const file = formData.get("file") as File | null;
 
-        if (!file) {
-            return NextResponse.json({ error: "No file provided" }, { status: 400 });
+        if (!file || !(file instanceof File)) {
+            return NextResponse.json({ error: "No file provided or invalid file" }, { status: 400 });
         }
 
         const buffer = Buffer.from(await file.arrayBuffer());

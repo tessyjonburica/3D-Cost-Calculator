@@ -6,8 +6,16 @@ import path from "path";
 import * as THREE from "three";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader.js";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
+import { ThreeMFLoader } from "three/examples/jsm/loaders/ThreeMFLoader.js";
+import { Decimal } from "@prisma/client/runtime/library";
 
-async function processModel(job: Job) {
+interface ProgressData {
+    projectId: string;
+    filePath: string;
+    originalFileName: string;
+}
+
+async function processModel(job: Job<ProgressData>) {
     const { projectId, filePath, originalFileName } = job.data;
     const fullPath = path.join(process.cwd(), "uploads", filePath);
 
@@ -31,19 +39,20 @@ async function processModel(job: Job) {
             const loader = new OBJLoader();
             const text = fileBuffer.toString();
             const object = loader.parse(text);
-
-            // Collect all geometries from the object
             const geometries: THREE.BufferGeometry[] = [];
             object.traverse((child) => {
-                if (child instanceof THREE.Mesh) {
-                    geometries.push(child.geometry);
-                }
+                if (child instanceof THREE.Mesh) geometries.push(child.geometry);
             });
-
-            if (geometries.length > 0) {
-                // For simplicity, handle first mesh or merge them
-                geometry = geometries[0];
-            }
+            if (geometries.length > 0) geometry = geometries[0];
+        } else if (extension === ".3mf") {
+            const loader = new ThreeMFLoader();
+            // 3MF loader needs a bit more work for server-side if it uses zip, but usually okay
+            const group = await (loader as any).parse(fileBuffer.buffer);
+            const geometries: THREE.BufferGeometry[] = [];
+            group.traverse((child: any) => {
+                if (child instanceof THREE.Mesh) geometries.push(child.geometry);
+            });
+            if (geometries.length > 0) geometry = geometries[0];
         }
 
         if (!geometry) {
@@ -57,32 +66,38 @@ async function processModel(job: Job) {
         const dimY = box.max.y - box.min.y;
         const dimZ = box.max.z - box.min.z;
 
-        // Compute Volume (assuming closed manifold mesh)
+        // Compute Volume
         let volume = 0;
         const position = geometry.attributes.position;
-        const faces = position.count / 3;
+        const index = geometry.index;
 
-        for (let i = 0; i < faces; i++) {
-            const v1 = new THREE.Vector3().fromBufferAttribute(position, i * 3 + 0);
-            const v2 = new THREE.Vector3().fromBufferAttribute(position, i * 3 + 1);
-            const v3 = new THREE.Vector3().fromBufferAttribute(position, i * 3 + 2);
-            volume += v1.dot(v2.cross(v3)) / 6.0;
+        if (index) {
+            for (let i = 0; i < index.count; i += 3) {
+                const v1 = new THREE.Vector3().fromBufferAttribute(position, index.getX(i + 0));
+                const v2 = new THREE.Vector3().fromBufferAttribute(position, index.getX(i + 1));
+                const v3 = new THREE.Vector3().fromBufferAttribute(position, index.getX(i + 2));
+                volume += v1.dot(v2.cross(v3)) / 6.0;
+            }
+        } else {
+            for (let i = 0; i < position.count; i += 3) {
+                const v1 = new THREE.Vector3().fromBufferAttribute(position, i + 0);
+                const v2 = new THREE.Vector3().fromBufferAttribute(position, i + 1);
+                const v3 = new THREE.Vector3().fromBufferAttribute(position, i + 2);
+                volume += v1.dot(v2.cross(v3)) / 6.0;
+            }
         }
         volume = Math.abs(volume);
-
-        // Polygon Count
-        const polygonCount = faces;
 
         // Update DB
         await prisma.modelFile.update({
             where: { projectId },
             data: {
                 status: "READY",
-                dimX: new THREE.Decimal(dimX),
-                dimY: new THREE.Decimal(dimY),
-                dimZ: new THREE.Decimal(dimZ),
-                volume: new THREE.Decimal(volume),
-                polygonCount,
+                dimX: new Decimal(dimX),
+                dimY: new Decimal(dimY),
+                dimZ: new Decimal(dimZ),
+                volume: new Decimal(volume),
+                polygonCount: position.count / 3,
             },
         });
 

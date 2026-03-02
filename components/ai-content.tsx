@@ -2,8 +2,6 @@
 
 import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Sparkles, Loader2 } from "lucide-react";
 import { updateAiContent } from "@/app/actions/ai-content";
 
@@ -50,44 +48,44 @@ export default function AiContent({ projectId, initialContent }: AiContentProps)
     };
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold uppercase tracking-tighter text-zinc-900">AI Content Generation</h3>
+        <div className="space-y-12">
+            <header className="flex items-center justify-between">
+                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-black">Artificial Intelligence</h3>
                 <Button
                     onClick={handleGenerate}
                     disabled={generating}
-                    variant="outline"
+                    variant="ghost"
                     size="sm"
-                    className="h-8 gap-2 text-[10px] font-bold uppercase tracking-wider"
+                    className="h-auto p-0 text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-black hover:bg-transparent"
                 >
-                    {generating ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
-                    {generating ? "Generating..." : "Generate AI Description"}
+                    {generating ? <Loader2 className="h-3 w-3 animate-spin mr-2" /> : <Sparkles className="h-3 w-3 mr-2" />}
+                    {generating ? "Synthesizing" : "Regenerate Content"}
                 </Button>
-            </div>
+            </header>
 
-            <div className="space-y-4">
-                <div className="space-y-2">
+            <div className="space-y-12">
+                <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                        <Label className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">Technical Description</Label>
-                        {saving && <span className="text-[10px] text-zinc-400 animate-pulse">Saving...</span>}
+                        <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-300">Technical Context</label>
+                        {saving && <div className="h-1 w-1 rounded-full bg-zinc-200 animate-pulse" />}
                     </div>
-                    <Textarea
+                    <textarea
                         value={content.descriptionText}
                         onChange={(e) => handleChange("descriptionText", e.target.value)}
                         onBlur={(e) => handleBlur("descriptionText", e.target.value)}
-                        placeholder="AI generated technical description will appear here..."
-                        className="min-h-[100px] text-xs leading-relaxed border-zinc-100 bg-zinc-50/30 resize-none focus-visible:ring-1 focus-visible:ring-zinc-200"
+                        placeholder="Project analysis pending..."
+                        className="w-full min-h-[140px] p-0 border-none bg-transparent text-xs leading-relaxed text-zinc-600 outline-none resize-none placeholder:text-zinc-100"
                     />
                 </div>
 
-                <div className="space-y-2">
-                    <Label className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">Commercial Copy</Label>
-                    <Textarea
+                <div className="space-y-4">
+                    <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-300">Commercial Proposal</label>
+                    <textarea
                         value={content.commercialText}
                         onChange={(e) => handleChange("commercialText", e.target.value)}
                         onBlur={(e) => handleBlur("commercialText", e.target.value)}
-                        placeholder="AI generated commercial copy will appear here..."
-                        className="min-h-[100px] text-xs leading-relaxed border-zinc-100 bg-zinc-50/30 resize-none focus-visible:ring-1 focus-visible:ring-zinc-200"
+                        placeholder="Offer details pending..."
+                        className="w-full min-h-[140px] p-0 border-none bg-transparent text-xs leading-relaxed text-zinc-600 outline-none resize-none placeholder:text-zinc-100"
                     />
                 </div>
             </div>
