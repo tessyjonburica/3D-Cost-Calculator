@@ -89,3 +89,4 @@ The engine takes the computed volume and combines it with user-defined parameter
 - **Strict Typing**: Full TypeScript coverage for backend and frontend.
 - **Minimalist Design**: Zero visual noise, focus on whitespace and typography.
 - **Industrial Logic**: Calculations follow standard manufacturing cost-plus models.
+
