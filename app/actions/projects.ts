@@ -5,22 +5,23 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { serialize } from "@/lib/utils";
 
 export async function getProjects() {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) return [];
 
-    return prisma.project.findMany({
+    return serialize(await prisma.project.findMany({
         where: { userId: session.user.id as string },
         orderBy: { updatedAt: "desc" },
-    });
+    }));
 }
 
 export async function getProjectById(id: string) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) return null;
 
-    return prisma.project.findUnique({
+    return serialize(await prisma.project.findUnique({
         where: {
             id,
             userId: session.user.id as string
@@ -31,7 +32,7 @@ export async function getProjectById(id: string) {
             calculation: true,
             aiContent: true,
         }
-    });
+    }));
 }
 
 export async function createProject() {

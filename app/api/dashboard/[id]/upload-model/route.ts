@@ -45,9 +45,10 @@ export async function POST(
         }
 
         const buffer = Buffer.from(await file.arrayBuffer());
-        const fileExtension = path.extname(file.name).toLowerCase();
+        const fileExtension = path.extname(file.name).toLowerCase().trim();
 
         if (![".stl", ".obj", ".3mf"].includes(fileExtension)) {
+            console.error(`Rejected file: ${file.name} with extension: [${fileExtension}]`);
             return NextResponse.json({ error: "Unsupported file format" }, { status: 400 });
         }
 
