@@ -21,7 +21,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
     return (
         <div className="min-h-screen bg-white selection:bg-zinc-100">
             <ModelStatusPoll projectId={project.id} currentStatus={project.modelFile?.status || "NONE"} />
-            <header className="px-8 py-6 border-b border-zinc-50">
+            <header className="px-8 py-6 border-b border-zinc-100">
                 <div className="mx-auto max-w-[1600px] flex items-center justify-between">
                     <Link href="/dashboard" className="group flex items-center text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-black transition-colors">
                         <ChevronLeft className="mr-2 h-3 w-3 group-hover:-translate-x-0.5 transition-transform" />
@@ -41,7 +41,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
                         <section className="space-y-10">
                             <ProjectEditor project={project} />
                         </section>
-                        <section className="pt-12 border-t border-zinc-50">
+                        <section className="pt-12 border-t border-zinc-100">
                             <ProjectParametersForm
                                 projectId={project.id}
                                 initialParameters={project.parameters}
@@ -75,7 +75,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
                             />
                         </section>
 
-                        <section className="pt-12 border-t border-zinc-50">
+                        <section className="pt-12 border-t border-zinc-100">
                             <AiContent
                                 projectId={project.id}
                                 initialContent={project.aiContent}

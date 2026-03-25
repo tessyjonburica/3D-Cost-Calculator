@@ -57,7 +57,7 @@ export default function ProjectParametersForm({ projectId, initialParameters }: 
                 {saving && <div className="h-1 w-1 rounded-full bg-black animate-ping" />}
             </header>
 
-            <div className="divide-y divide-zinc-50 border-t border-b border-zinc-50">
+            <div className="divide-y divide-zinc-100 border-t border-b border-zinc-100">
                 <div className="flex items-center justify-between py-2 group">
                     <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 group-hover:text-black transition-colors">Technology</Label>
                     <Select

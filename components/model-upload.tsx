@@ -56,7 +56,7 @@ export default function ModelUpload({ projectId }: ModelUploadProps) {
     return (
         <label 
             className={`w-full h-[500px] flex flex-col items-center justify-center border-2 border-dashed rounded-3xl transition-all cursor-pointer group relative 
-                ${dragging ? "border-zinc-900 bg-zinc-50/50 scale-[0.99]" : "border-zinc-100 hover:bg-zinc-50/50 hover:border-zinc-200"}`}
+                ${dragging ? "border-zinc-900 bg-zinc-50/50 scale-[0.99]" : "border-zinc-200 hover:bg-zinc-50/50 hover:border-zinc-300"}`}
             onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
             onDragLeave={() => setDragging(false)}
             onDrop={handleDrop}
