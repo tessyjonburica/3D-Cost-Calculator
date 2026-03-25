@@ -32,7 +32,7 @@ export default async function ProjectsPage() {
                 ) : (
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         {projects.map((project) => (
-                            <Link key={project.id} href={`/projects/${project.id}`}>
+                            <Link key={project.id} href={`/dashboard/${project.id}`}>
                                 <Card className="transition-all hover:border-zinc-400 shadow-none border-zinc-200">
                                     <CardHeader>
                                         <CardTitle className="text-lg font-semibold truncate">

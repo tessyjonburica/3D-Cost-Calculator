@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { toast } from "sonner";
 import { register } from "@/app/actions/register";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,11 +31,14 @@ export default function RegisterPage() {
 
             if (result.error) {
                 setError(result.error);
+                toast.error(result.error);
             } else {
-                router.push("/login?message=Account created successfully");
+                toast.success("Account created successfully! Please login.");
+                router.push("/login");
             }
         } catch (err) {
             setError("Something went wrong. Please try again.");
+            toast.error("Something went wrong. Please try again.");
         } finally {
             setLoading(false);
         }

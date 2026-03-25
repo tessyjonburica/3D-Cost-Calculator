@@ -1,12 +1,8 @@
 import { Worker, Job } from "bullmq";
-import { connection } from "../lib/queue/connection";
-import prisma from "../lib/prisma";
+import { connection } from "../lib/queue/connection.ts";
+import prisma from "../lib/prisma.ts";
 import * as fs from "fs/promises";
 import path from "path";
-import * as THREE from "three";
-import { STLLoader } from "three/examples/jsm/loaders/STLLoader.js";
-import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
-import { ThreeMFLoader } from "three/examples/jsm/loaders/ThreeMFLoader.js";
 import { Decimal } from "@prisma/client/runtime/library";
 
 interface ProgressData {
@@ -22,6 +18,13 @@ async function processModel(job: Job<ProgressData>) {
     console.log(`[worker] Processing ${originalFileName} for project ${projectId}`);
 
     try {
+        // Dynamic imports for ESM-only three.js
+        const { default: THREE_DEFAULT, ...THREE_REST } = await import("three") as any;
+        const THREE = { ...THREE_DEFAULT, ...THREE_REST };
+        const { STLLoader } = await import("three/examples/jsm/loaders/STLLoader.js") as any;
+        const { OBJLoader } = await import("three/examples/jsm/loaders/OBJLoader.js") as any;
+        const { ThreeMFLoader } = await import("three/examples/jsm/loaders/3MFLoader.js") as any;
+
         await prisma.modelFile.update({
             where: { projectId },
             data: { status: "PROCESSING" },
@@ -30,7 +33,7 @@ async function processModel(job: Job<ProgressData>) {
         const fileBuffer = await fs.readFile(fullPath);
         const extension = path.extname(originalFileName).toLowerCase();
 
-        let geometry: THREE.BufferGeometry | null = null;
+        let geometry: any = null;
 
         if (extension === ".stl") {
             const loader = new STLLoader();
@@ -39,8 +42,8 @@ async function processModel(job: Job<ProgressData>) {
             const loader = new OBJLoader();
             const text = fileBuffer.toString();
             const object = loader.parse(text);
-            const geometries: THREE.BufferGeometry[] = [];
-            object.traverse((child) => {
+            const geometries: any[] = [];
+            object.traverse((child: any) => {
                 if (child instanceof THREE.Mesh) geometries.push(child.geometry);
             });
             if (geometries.length > 0) geometry = geometries[0];
@@ -48,7 +51,7 @@ async function processModel(job: Job<ProgressData>) {
             const loader = new ThreeMFLoader();
             // 3MF loader needs a bit more work for server-side if it uses zip, but usually okay
             const group = await (loader as any).parse(fileBuffer.buffer);
-            const geometries: THREE.BufferGeometry[] = [];
+            const geometries: any[] = [];
             group.traverse((child: any) => {
                 if (child instanceof THREE.Mesh) geometries.push(child.geometry);
             });

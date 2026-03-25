@@ -18,7 +18,7 @@ export default function AiContent({ projectId, initialContent }: AiContentProps)
     const handleGenerate = async () => {
         setGenerating(true);
         try {
-            const res = await fetch(`/api/projects/${projectId}/generate-texts`, { method: "POST" });
+            const res = await fetch(`/api/dashboard/${projectId}/generate-texts`, { method: "POST" });
             if (res.ok) {
                 const data = await res.json();
                 setContent(data.aiContent);

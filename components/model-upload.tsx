@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Upload, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface ModelUploadProps {
     projectId: string;
@@ -22,13 +23,21 @@ export default function ModelUpload({ projectId }: ModelUploadProps) {
         formData.append("file", file);
 
         try {
-            await fetch(`/api/projects/${projectId}/upload-model`, {
+            const res = await fetch(`/api/dashboard/${projectId}/upload-model`, {
                 method: "POST",
                 body: formData,
             });
+
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.error || "Upload failed");
+            }
+
+            toast.success("Model uploaded and queued for processing");
             router.refresh();
-        } catch (err) {
+        } catch (err: any) {
             console.error("Upload failed:", err);
+            toast.error(err.message || "Failed to upload model");
         } finally {
             setUploading(false);
         }

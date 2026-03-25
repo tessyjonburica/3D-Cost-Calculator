@@ -4,6 +4,7 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,7 +32,8 @@ export default function LoginPage() {
             if (result?.error) {
                 setError("Invalid email or password");
             } else {
-                router.push("/projects");
+                toast.success("Welcome back!");
+                router.push("/dashboard");
                 router.refresh();
             }
         } catch (err) {

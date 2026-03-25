@@ -24,7 +24,7 @@ export default function ProjectParametersForm({ projectId, initialParameters }: 
         setSaving(true);
         try {
             await updateProjectParameters(projectId, { [field]: value });
-            await fetch(`/api/projects/${projectId}/calculate`, { method: "POST" });
+            await fetch(`/api/dashboard/${projectId}/calculate`, { method: "POST" });
         } catch (error) {
             console.error("Failed to save parameters:", error);
         } finally {

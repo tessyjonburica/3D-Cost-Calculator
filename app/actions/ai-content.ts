@@ -18,5 +18,5 @@ export async function updateAiContent(projectId: string, data: { descriptionText
         },
     });
 
-    revalidatePath(`/projects/${projectId}`);
+    revalidatePath(`/dashboard/${projectId}`);
 }

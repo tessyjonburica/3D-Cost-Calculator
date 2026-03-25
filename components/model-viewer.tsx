@@ -5,7 +5,7 @@ import { Canvas, useLoader } from "@react-three/fiber";
 import { OrbitControls, Stage, Center } from "@react-three/drei";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader.js";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
-import { ThreeMFLoader } from "three/examples/jsm/loaders/ThreeMFLoader.js";
+import { ThreeMFLoader } from "three/examples/jsm/loaders/3MFLoader.js";
 import * as THREE from "three";
 
 interface ModelProps {

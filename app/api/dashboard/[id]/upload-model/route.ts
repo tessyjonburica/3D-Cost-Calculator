@@ -14,14 +14,14 @@ const uploadSchema = z.object({
 
 export async function POST(
     req: NextRequest,
-    context: { params: { projectId: string } }
+    context: { params: { id: string } }
 ) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { projectId } = await context.params;
+    const { id: projectId } = await context.params;
     const validation = uploadSchema.safeParse({ projectId });
     if (!validation.success) {
         return NextResponse.json({ error: "Invalid project ID" }, { status: 400 });

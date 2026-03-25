@@ -30,5 +30,5 @@ export async function updateProjectParameters(projectId: string, data: any) {
         },
     });
 
-    revalidatePath(`/projects/${projectId}`);
+    revalidatePath(`/dashboard/${projectId}`);
 }

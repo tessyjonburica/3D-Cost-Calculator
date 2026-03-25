@@ -45,8 +45,8 @@ export async function createProject() {
         },
     });
 
-    revalidatePath("/projects");
-    redirect(`/projects/${project.id}`);
+    revalidatePath("/dashboard");
+    redirect(`/dashboard/${project.id}`);
 }
 
 export async function updateProject(id: string, data: {
@@ -73,8 +73,8 @@ export async function updateProject(id: string, data: {
         data,
     });
 
-    revalidatePath(`/projects/${id}`);
-    revalidatePath("/projects");
+    revalidatePath(`/dashboard/${id}`);
+    revalidatePath("/dashboard");
 }
 
 export async function deleteProject(id: string) {
@@ -88,6 +88,6 @@ export async function deleteProject(id: string) {
         },
     });
 
-    revalidatePath("/projects");
-    redirect("/projects");
+    revalidatePath("/dashboard");
+    redirect("/dashboard");
 }
