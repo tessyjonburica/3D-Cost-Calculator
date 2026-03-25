@@ -47,7 +47,7 @@ export default function ProjectEditor({ project }: ProjectEditorProps) {
                     onChange={(e) => handleChange("name", e.target.value)}
                     onBlur={(e) => handleBlur("name", e.target.value)}
                     placeholder="Enter project name..."
-                    className="h-auto p-0 border-none text-2xl font-black tracking-tight placeholder:text-zinc-100 focus-visible:ring-0 focus-visible:ring-offset-0"
+                    className="h-auto p-0 border-none text-2xl font-black text-zinc-900 tracking-tight placeholder:text-zinc-100 focus-visible:ring-0 focus-visible:ring-offset-0"
                 />
             </div>
 
@@ -60,7 +60,7 @@ export default function ProjectEditor({ project }: ProjectEditorProps) {
                             onChange={(e) => handleChange("clientName", e.target.value)}
                             onBlur={(e) => handleBlur("clientName", e.target.value)}
                             placeholder="Client Name"
-                            className="w-full text-xs font-semibold placeholder:text-zinc-200 outline-none"
+                            className="w-full text-xs font-semibold text-zinc-900 placeholder:text-zinc-200 outline-none"
                         />
                         <input
                             value={data.clientContact}
@@ -79,7 +79,7 @@ export default function ProjectEditor({ project }: ProjectEditorProps) {
                         onChange={(e) => handleChange("notes", e.target.value)}
                         onBlur={(e) => handleBlur("notes", e.target.value)}
                         placeholder="Project specifics, material requirements, or timeline notes..."
-                        className="min-h-[120px] p-0 border-none text-xs leading-relaxed text-zinc-600 placeholder:text-zinc-100 resize-none focus-visible:ring-0"
+                        className="min-h-[120px] p-0 border-none text-xs leading-relaxed text-zinc-900 placeholder:text-zinc-100 resize-none focus-visible:ring-0"
                     />
                 </div>
             </div>

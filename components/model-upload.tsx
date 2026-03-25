@@ -12,12 +12,22 @@ interface ModelUploadProps {
 
 export default function ModelUpload({ projectId }: ModelUploadProps) {
     const [uploading, setUploading] = useState(false);
+    const [dragging, setDragging] = useState(false);
     const router = useRouter();
 
-    const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (!file) return;
+        if (file) uploadFile(file);
+    };
 
+    const handleDrop = async (e: React.DragEvent) => {
+        e.preventDefault();
+        setDragging(false);
+        const file = e.dataTransfer.files?.[0];
+        if (file) uploadFile(file);
+    };
+
+    const uploadFile = async (file: File) => {
         setUploading(true);
         const formData = new FormData();
         formData.append("file", file);
@@ -44,8 +54,14 @@ export default function ModelUpload({ projectId }: ModelUploadProps) {
     };
 
     return (
-        <label className="w-full h-[500px] flex flex-col items-center justify-center border-2 border-dashed border-zinc-100 rounded-3xl hover:bg-zinc-50/50 hover:border-zinc-200 transition-all cursor-pointer group relative">
-            <input type="file" className="hidden" accept=".stl,.obj,.3mf" onChange={handleUpload} disabled={uploading} />
+        <label 
+            className={`w-full h-[500px] flex flex-col items-center justify-center border-2 border-dashed rounded-3xl transition-all cursor-pointer group relative 
+                ${dragging ? "border-zinc-900 bg-zinc-50/50 scale-[0.99]" : "border-zinc-100 hover:bg-zinc-50/50 hover:border-zinc-200"}`}
+            onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+            onDragLeave={() => setDragging(false)}
+            onDrop={handleDrop}
+        >
+            <input type="file" className="hidden" accept=".stl,.obj,.3mf" onChange={handleFileChange} disabled={uploading} />
 
             <div className="text-center space-y-6">
                 <div className="mx-auto w-12 h-12 flex items-center justify-center rounded-2xl bg-zinc-50 group-hover:scale-110 transition-transform">
@@ -56,13 +72,13 @@ export default function ModelUpload({ projectId }: ModelUploadProps) {
                     <p className="text-[11px] font-black uppercase tracking-[0.3em] text-black">
                         {uploading ? "Ingesting Geometry" : "Import 3D Asset"}
                     </p>
-                    <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest leading-loose">
+                    <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest leading-loose">
                         STL / OBJ / 3MF <br /> Maximum 50mb
                     </p>
                 </div>
             </div>
 
-            <div className="absolute bottom-8 text-[8px] font-bold text-zinc-300 uppercase tracking-widest">
+            <div className="absolute bottom-8 text-[8px] font-bold text-zinc-500 uppercase tracking-widest">
                 Drag and drop or click to browse
             </div>
         </label>

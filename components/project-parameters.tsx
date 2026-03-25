@@ -45,7 +45,7 @@ export default function ProjectParametersForm({ projectId, initialParameters }: 
                 value={params[id] || ""}
                 onChange={(e) => handleChange(id, e.target.value)}
                 onBlur={(e) => handleBlur(id, e.target.value)}
-                className="w-24 text-right text-xs font-mono font-bold outline-none bg-transparent"
+                className="w-24 text-right text-xs font-mono font-bold text-zinc-900 outline-none bg-transparent"
             />
         </div>
     );
